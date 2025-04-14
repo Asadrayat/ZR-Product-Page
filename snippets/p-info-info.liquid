@@ -1,0 +1,83 @@
+{% comment %}
+  -----------------------
+{% endcomment %}
+
+<style>
+    .accordion-wrapper--{{ section.id }}{
+      .p-info-info-wrapper.accordion {
+        box-sizing: border-box;
+        padding: 12px 0 12px 0;
+        border-top: 1px solid #e5e7eb;
+      }
+      .p-info-info-wrapper.accordion:last-child{
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .p-info-info-contents {
+        padding-top: 8px;
+      }
+      .p-info-info-wrapper.accordion svg{
+        transform-origin: center;
+        transition: .7s;
+      }
+      .p-info-info-wrapper.accordion.active svg{
+        transform: rotate(180deg);
+      }
+    }
+    .acr-content-{{ section.id }} {
+      .p-info-info-contents p:first-child{
+        margin-top: 0;
+      }
+      .p-info-info-contents p:last-child{
+        margin-bottom: 0;
+      }
+    }
+    .acr-title-{{ section.id }} {
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-gap: 10px;
+      align-items: center;
+    }
+  </style>
+  
+  <div class="accordion-wrapper--{{ section.id }} prod-info-accrodion-{{ product.id }}">
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'info' %}
+          <div class="p-info-info-wrapper accordion">
+            <div class="acr-title-{{ section.id }}">
+              {% unless block.settings.title == blank %}
+                <h2 class="p-info-info-title">{{ block.settings.title }}</h2>
+                <svg
+                  fill="#000000"
+                  width="20px"
+                  height="20px"
+                  viewBox="-5 -8 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="xMinYMin"
+                  class="jam jam-chevron-down"
+                >
+                  <path d='M7.071 5.314l4.95-4.95a1 1 0 1 1 1.414 1.414L7.778 7.435a1 1 0 0 1-1.414 0L.707 1.778A1 1 0 1 1 2.121.364l4.95 4.95z' />
+                </svg>
+              {% endunless %}
+            </div>
+            <div class="acr-content-{{ section.id }}">
+              <div class="p-info-info-contents">{{ block.settings.richtext }}</div>
+              <div class="p-info-info-contents">{{ block.settings.textarea }}</div>
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </div>
+  
+  <script>
+    // document.addEventListener("DOMContentLoaded", e => {
+    //   new Accordion(".prod-info-accrodion", {
+    //     closeAll: true,
+    //     initOpenIndex: 1,
+    //     duration: 700,
+    //     activeClass: "active",
+    //   });
+    // })
+  </script>
+  

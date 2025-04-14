@@ -1,0 +1,351 @@
+{% comment %}
+  ---------------------
+{% endcomment %}
+
+
+{% liquid
+    assign id = section.id
+    assign select_variant_image_id = product.selected_or_first_available_variant.featured_media.id
+  %}
+  
+  <style>
+    #shopify-section-{{id}} {
+      box-sizing: border-box;
+      margin-top: {{section.settings.margin_top | append: 'px'}};
+      margin-bottom: {{section.settings.margin_bottom | append: 'px'}};
+      padding-top: {{section.settings.padding_top | append: 'px'}};
+      padding-bottom: {{section.settings.padding_bottom | append: 'px'}};
+      max-width: 100vw;
+      overflow: hidden;
+    }
+  
+    @media(max-width: 768px) {
+      #shopify-section-{{id}} {
+        margin-top: {{section.settings.margin_top_m | append: 'px'}};
+        margin-bottom: {{section.settings.margin_bottom_m | append: 'px'}};
+        padding-top: {{section.settings.padding_top_m | append: 'px'}};
+        padding-bottom: {{section.settings.padding_bottom_m | append: 'px'}};
+      }
+    }
+  </style>
+  
+  <div id="main-product-information" data-id="{{ section.id }}" data-selected-image-id="{{ select_variant_image_id }}">
+    <product-information data-update-url="true" data-product-id="{{ product.id }}" data-url="{{ product.url }}" data-selected-image="{{ product.selected_or_first_available_variant.featured_media.id }}">
+      {{ 'product-information-v2.css' | asset_url | stylesheet_tag }}
+      <div class="p-info-container">
+        <div class="{% unless section.settings.full_width %}page-width{% endunless %}">
+          <div class="p-info-wrapper">
+            <div class="p-info-media">
+              <div class="p-info-sliders">
+                <div class="swiper p-info-thumb">
+                  <div class="swiper-wrapper">
+                    {% if product.media.size == 1 %}
+                      {% for i in (1..5) %}
+                        <div class="swiper-slide p-info-thumb-slide" data-image-id="" data-index="0">
+                          <picture class="p-info-thumb-pic">
+                            <source
+                              media="(max-width: 600px)"
+                              srcset="{{ product.featured_image | image_url: width: 600 }}"
+                            >
+                            <source
+                              media="(max-width: 1024px)"
+                              srcset="{{ product.featured_image | image_url: width: 1024 }}"
+                            >
+                            {{ product.featured_image | image_url: width: product.featured_image.width | image_tag }}
+                          </picture>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      {% for media in product.media %}
+                        <div
+                          class="swiper-slide p-info-thumb-slide"
+                          data-image-id="{{ media.id }}"
+                          data-index="{{ forloop.index0 }}"
+                        >
+                          <picture class="p-info-thumb-pic">
+                            <source media="(max-width: 600px)" srcset="{{ media | image_url: width: 500 }}">
+                            <source media="(max-width: 1024px)" srcset="{{ media | image_url: width: 1024 }}">
+                            {{ media | image_url: width: media.width | image_tag }}
+                          </picture>
+                        </div>
+                      {% endfor %}
+                      {% for media in product.media %}
+                        <div
+                          class="swiper-slide p-info-thumb-slide"
+                          data-image-id="{{ media.id }}"
+                          data-index="{{ forloop.index0 }}"
+                        >
+                          <picture class="p-info-thumb-pic">
+                            <source media="(max-width: 600px)" srcset="{{ media | image_url: width: 500 }}">
+                            <source media="(max-width: 1024px)" srcset="{{ media | image_url: width: 1024 }}">
+                            {{ media | image_url: width: media.width | image_tag }}
+                          </picture>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="p-info-gallery"></div>
+              </div>
+            </div>
+            <div class="p-info-content">
+              <div class="p-info-conent-wrapper">
+                <div class="p-info-top info-bg">
+                  {% for block in section.blocks %}
+                    {% case block.type %}
+                      {% when '@app' %}
+                        <div class="p-info-app-block">{% render block %}</div>
+                      {% when 'title' %}
+                        <h2 class="p-info-title {{ class }}">{{ product.title }}</h2>
+                      {% when 'price' %}
+                        <div class="p-info-price-wrapper {{ class }}">
+                          <div class="p-info-price">
+                            {% if product.selected_or_first_available_variant.price
+                                < product.selected_or_first_available_variant.compare_at_price
+                            %}
+                              {% comment %} Calculate the discount amount {% endcomment %}
+                              {% assign discount_amount = product.selected_or_first_available_variant.compare_at_price
+                                | minus: product.selected_or_first_available_variant.price
+                              %}
+  
+                              <h3 class="p-info-rgular-price">
+                                {{ product.selected_or_first_available_variant.price | money }}
+                              </h3>
+                              <h4 class="p-info-compare-price">
+                                <s>{{ product.selected_or_first_available_variant.compare_at_price | money }}</s>
+                              </h4>
+                              <p class="p-info-discount">({{ discount_amount | money }} off)</p>
+                            {% else %}
+                              <h3 class="p-info-rgular-price">
+                                {{ product.selected_or_first_available_variant.price | money }}
+                              </h3>
+                            {% endif %}
+                          </div>
+                        </div>
+                    {% endcase %}
+                  {% endfor %}
+                  <div class="p-info-gender">
+                    {% unless product.metafields.custom.gender_product_male == blank %}
+                      <a href="{{ product.metafields.custom.gender_product_male.value.url }}">{{ product.metafields.custom.gender_label_male }}</a>
+                    {% endunless %}
+                    {% unless product.metafields.custom.gender_product_female == blank %}
+                      <a href="{{ product.metafields.custom.gender_product_female.value.url }}">{{ product.metafields.custom.gender_label_female }}</a>
+                    {% endunless %}
+                  </div>
+                </div>
+                {% for block in section.blocks %}
+                  {% case block.type %}
+                    {% when 'richtext' %}
+                      <div class="p-info-richtext">{{ block.settings.richtext }}</div>
+                    {% when 'variant-picker' %}
+                      {% render 'p-info-variant-picker-v2', product: product, section: section, block: block %}
+                    {% when 'buy-button' %}
+                      {% render 'p-info-buy-button', product: product, block: block %}
+                    {% when 'richtext' %}
+                      {% render 'p-info-richtext', section: section, product: product, block: block %}
+                  {% endcase %}
+                {% endfor %}
+                {% render 'p-info-info', section: section, product: product %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="application/json-{{ product.id }}">{{ product | json }}</script>
+    </product-information>
+  </div>
+  
+  {% schema %}
+  {
+    "name": "Product Information V2",
+    "templates": ["product"],
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "full_width",
+        "label": "Full Width Section",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Section Spacing Desktop"
+      },
+      {
+        "type": "range",
+        "id": "margin_top",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin Top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "margin_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin Bottom",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding Top",
+        "default": 48
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding Bottom",
+        "default": 48
+      },
+      {
+        "type": "header",
+        "content": "Section Spacing Mobile"
+      },
+      {
+        "type": "range",
+        "id": "margin_top_m",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin Top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "margin_bottom_m",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin Bottom",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_top_m",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding Top",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom_m",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding Bottom",
+        "default": 32
+      }
+    ],
+    "blocks": [
+      {
+        "type": "@app"
+      },
+      {
+        "type": "title",
+        "name": "Title",
+        "limit": 1
+      },
+      {
+        "type": "price",
+        "name": "Price",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "show_review",
+            "label": "Show Review",
+            "default": true
+          }
+        ]
+      },
+      {
+        "type": "variant-picker",
+        "name": "Variant Picker",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "size_guide",
+            "label": "Show Size Guide",
+            "default": true
+          }
+        ]
+      },
+      {
+        "type": "buy-button",
+        "name": "Buy Button",
+        "limit": 1,
+        "settings": [
+            {
+              "type": "checkbox",
+              "id": "show_dynamic_checkout",
+              "label": "Show Dynamic Checkout",
+              "default": false
+            }
+        ]
+      },
+      {
+        "type": "richtext",
+        "name": "Richtext",
+        "settings": [
+          {
+            "type": "richtext",
+            "label": "Richtext",
+            "id": "richtext"
+          }
+        ]
+      },
+      {
+        "type": "info",
+        "name": "Info",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title"
+          },
+          {
+            "type": "inline_richtext",
+            "label": "Inline Richtext",
+            "id": "inline_richtext"
+          },
+          {
+            "type": "richtext",
+            "label": "Richtext",
+            "id": "richtext"
+          },
+          {
+            "type": "textarea",
+            "id": "textarea",
+            "label": "Textarea"
+          },
+          {
+            "type": "page",
+            "id": "page",
+            "label": "Page"
+          }
+        ]
+      }
+    ]
+  }
+  {% endschema %}
+  
