@@ -1,0 +1,58 @@
+{%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+{%- unless color_option -%}
+  {%- assign color_option = product.options_with_values | where: 'name', 'Colour' | first -%}
+{%- endunless -%}
+
+{%- if color_option and color_option.values.size > 0 -%}
+  <div class="product-card__swatches">
+    {%- assign max_visible_swatches = 4 -%}
+    {%- assign total_colors = color_option.values.size -%}
+    {%- assign visible_colors = color_option.values -%}
+
+    {%- if total_colors > max_visible_swatches -%}
+      {%- assign visible_colors = color_option.values | slice: 0, max_visible_swatches -%}
+    {%- endif -%}
+
+    {%- for value in visible_colors -%}
+      {%- assign variant_for_color = product.variants | where: 'option1', value | first -%}
+      {%- unless variant_for_color -%}
+        {%- assign variant_for_color = product.variants | where: 'option2', value | first -%}
+      {%- endunless -%}
+      {%- unless variant_for_color -%}
+        {%- assign variant_for_color = product.variants | where: 'option3', value | first -%}
+      {%- endunless -%}
+
+      {%- assign color_handle = value | handle -%}
+      {%- assign color_image = color_handle | append: '.png' | file_url -%}
+      {%- assign color_value = color_handle -%}
+
+      {%- assign image_exists = false -%}
+      {%- if images[color_handle] -%}
+        {%- assign image_exists = true -%}
+      {%- endif -%}
+
+      {%- assign is_available = variant_for_color.available -%}
+
+      <a
+        href="{% if variant_for_color and is_available %}{{ variant_for_color.url }}{% else %}#{% endif %}"
+        class="product-card__swatch{% unless is_available %} product-card__swatch--disabled{% endunless %}"
+        style="{% if image_exists %}background-image: url({{ color_image }});{% else %}background-color: {{ color_value }};{% endif %}"
+        title="{{ value }}{% unless is_available %} (Unavailable){% endunless %}"
+        {% unless is_available %}
+          aria-disabled="true"
+        {% endunless %}
+      >
+        <span class="visually-hidden">
+          {{- value -}}
+          {%- unless is_available %} (Unavailable){% endunless -%}
+        </span>
+      </a>
+    {%- endfor -%}
+
+    {%- if total_colors > max_visible_swatches -%}
+      <a href="{{ product.url }}" class="product-card__swatch--more" title="More colors">
+        +{{ total_colors | minus: max_visible_swatches }}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

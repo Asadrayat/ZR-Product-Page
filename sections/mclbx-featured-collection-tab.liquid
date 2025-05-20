@@ -1,0 +1,457 @@
+{% liquid
+  assign id = section.id
+%}
+
+<style>
+    .sec-{{ id }} {
+      box-sizing: border-box;
+      margin-top: {{section.settings.margin_top | append: 'px'}};
+      margin-bottom: {{section.settings.margin_bottom | append: 'px'}};
+      padding-top: {{section.settings.padding_top | append: 'px'}};
+      padding-bottom: {{section.settings.padding_bottom | append: 'px'}};
+
+    }
+
+    @media(max-width: 600px) {
+      .sec-{{ id }} {
+        margin-top: {{section.settings.margin_top_m | append: 'px'}};
+        margin-bottom: {{section.settings.margin_bottom_m | append: 'px'}};
+        padding-top: {{section.settings.padding_top_m | append: 'px'}};
+        padding-bottom: {{section.settings.padding_bottom_m | append: 'px'}};
+      }
+    }
+
+  .wrapper-{{ id }}{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: var(--Spacing-Container-md);
+     @media(max-width: 600px) {
+       display: block;
+     }
+  .--top-block {
+      display: flex;
+      gap: var(--Spacing-Container-xxs);
+      flex-direction: column;
+      justify-content: space-between;
+      @media(max-width: 600px){
+        gap: var(--Spacing-Container-xs);
+        margin-bottom: var(--Spacing-Container-sm);
+      }
+  }
+    h2.--section-title {
+        color: var(--Content-Base-main, #1F2937);
+        font-family: var(--font-family-Title, "Neue Plak");
+        /* font-size: var(--Font-Size-Heading-H2, 40px); */
+        font-weight: 500;
+        /* line-height: var(--Line-Height-Heading-H2, 40px); */
+        letter-spacing: -0.4px;
+        margin-block: 0 var(--Spacing-Container-sm);
+    }
+  .--section-subtitle {
+      color: var(--Content-Base-main, #1F2937);
+      font-family: var(--font-family-Body, "Neue Plak");
+      font-size: var(--Font-Size-Paragraph-Medium);
+      line-height: var(--Line-Height-Paragraph-Medium);
+  }
+
+   h3.--filter-title {
+      color: var(--Content-Base-subtle, #9CA3AF);
+      font-family: var(--font-family-Title, "Neue Plak");
+      font-weight: 400;
+      margin-block: var(--Spacing-Container-sm);
+      padding-left: var(--Spacing-Container-sm, 16px);
+     cursor: pointer;
+
+   }
+   h3.--filter-title.--active-collection {
+     color: var(--Content-Base-main, #1F2937);
+     border-left: 2px solid var(--Border-Base-dense, #4B5563);
+   }
+
+
+
+  /* Swiper Styling */
+
+  .tabs__contents{
+    height: auto;
+    position: relative;
+    grid-column: 2/-1;
+     @media(max-width: 600px){
+       grid-column: unset;
+    }
+  }
+  .--static-container{
+    visibilty: hidden;
+    opacity: 0;
+  }
+  .--slider-wrapper{
+    position: absolute;
+    top: 0;
+    /* left: 150%; */
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transition: 0.5s ease, opacity 0.1s ;
+    /* display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s; */
+    @media(max-width: 600px){
+
+    }
+  }
+    .swiper:not(.swiper-initialized) .swiper-slide {
+          max-width: calc(var(--page-width)/4) !important;
+          margin-right: 16px;
+          overflow: hidden;
+      }
+  .--slider-wrapper.--tab-collection.--active-collection{
+
+    opacity: 1;
+    @media(max-width: 600px){
+
+    }
+  }
+
+  .--nav-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      background: #fff;
+      line-height: 1;
+      position: absolute;
+      top: 50%;
+      z-index: 1;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-50%);
+      box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.10), 0px 1px 3px 0px rgba(0, 0, 0, 0.10);
+      cursor: pointer;
+      z-index: 2;
+      @media(max-width: 600px){
+        display: flex;
+      }
+  }
+  .--nav-icon.swiper-button-disabled {
+      display: none;
+  }
+    .prev-{{ section.id }}.--nav-icon {
+      left: -20px;
+    }
+    .next-{{ section.id }}.--nav-icon {
+      right: -20px;
+    }
+  }
+</style>
+
+<div id="{{ section.settings.id_nav | downcase }}" class="sec-{{ id }}">
+  <div class="{% unless section.settings.full_width %}page-width{% endunless %}">
+    <div class="wrapper-{{ id }}">
+      <div class="--top-block">
+        <div class="--text-content">
+          <h2 class="--section-title">{{ section.settings.title }}</h2>
+          <div class="--section-subtitle">{{ section.settings.subtitle }}</div>
+        </div>
+        <div class="--filter-labels-wrapper">
+          {% for block in section.blocks %}
+            <h3
+              class=" --filter-title {% if forloop.first %} --active-collection {% endif %}"
+              data-title="collection-{{ section.id }}-{{ block.id }} "
+            >
+              {{ block.settings.title }}
+            </h3>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="tabs__contents">
+        {% for block in section.blocks limit: 1 %}
+          <div
+            class="--slider-wrapper- --static-container --tab-collection {% if forloop.first %} --active-collection {% endif %}"
+          >
+            <div class="swiper swiper-{{ section.id }}--{{ block.id }}">
+              <div class="swiper-wrapper">
+                {% for product in block.settings.collection.products limit: 1 %}
+                  <div class="swiper-slide">
+                    {%# render 'card-product-new-v2', product: product, forloop: forloop, class: '', block: block %}
+                  {% render 'card-product-new-v3',
+                      product: product,
+                      forloop: forloop,
+                      class: 'swiper-slide',
+                      block: block
+                    %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="prev-{{ section.id }} --nav-icon">
+              {% render 'all-icons', name: 'left_arrow' %}
+            </div>
+            <div class="next-{{ section.id }} --nav-icon">
+              {% render 'all-icons', name: 'right_arrow' %}
+            </div>
+          </div>
+        {% endfor %}
+        {% for block in section.blocks %}
+          <div
+            class="--slider-wrapper swiper__container__ --tab-collection {% if forloop.first %} --active-collection {% endif %}"
+            data-title="collection-{{ section.id }}-{{ block.id }}  "
+          >
+            <div class="swiper swiper-{{ section.id }}--{{ block.id }}">
+              <div class="swiper-wrapper">
+                {% for product in block.settings.collection.products limit: 8 %}
+                  <div class="swiper-slide">
+                    {% render 'card-product-new-v3',
+                      product: product,
+                      forloop: forloop,
+                      class: 'swiper-slide',
+                      block: block
+                    %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="prev-{{ section.id }} --nav-icon prev-{{ section.id }}--{{ block.id }}">
+              {% render 'all-icons', name: 'left_arrow' %}
+            </div>
+            <div class="next-{{ section.id }} --nav-icon next-{{ section.id }}--{{ block.id }}">
+              {% render 'all-icons', name: 'right_arrow' %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+  // function initmySwiper(classname) {
+  //   if(classname){
+  //         new Swiper(classname, {
+  //         slidesPerView: 1.2,
+  //         spaceBetween: 12,
+  //         autoHeight: true,
+  //         navigation: {
+  //           nextEl: '.next-{{ section.id }}',
+  //           prevEl: '.prev-{{ section.id }}'
+  //         },
+  //         breakpoints: {
+  //           600:{
+  //             slidesPerView: 3,
+  //             spaceBetween: 16
+  //           }
+  //         }
+  //       });
+  //   } else {
+  //     console.log(" No class Found");
+  //   }
+  // }
+  function initmySwiper(classname,prev,next) {
+    if(classname){
+          new Swiper(classname, {
+          slidesPerView: 1.2,
+          spaceBetween: 0,
+          autoHeight: true,
+          touchMoveStopPropagation: true,
+          // touchStartPropagation: false,
+          // preventClicks: true,
+          // preventClicksPropagation: true,
+          // slideToClickedSlide: false,
+          // allowTouchMove: false,
+          navigation: {
+            nextEl: next ,
+            prevEl: prev
+          },
+          breakpoints: {
+            600:{
+              slidesPerView: 3,
+              spaceBetween: 0
+            }
+          }
+        });
+    } else {
+      console.log(" No class Found");
+    }
+  }
+
+    {% for block in section.blocks %}
+      initmySwiper(".swiper-{{ section.id }}--{{ block.id }}",".prev-{{ section.id }}--{{ block.id }}",".next-{{ section.id }}--{{ block.id }}");
+    {% endfor %}
+
+      // window.addEventListener('resize', function() {
+      //   {% for block in section.blocks %}
+      //     // initmySwiper(".swiper-{{ section.id }}--{{ block.id }}");
+      //     initmySwiper(".swiper-{{ section.id }}--{{ block.id }}",".prev-{{ section.id }}--{{ block.id }}",".next-{{ section.id }}--{{ block.id }}");
+      //   {% endfor %}
+      // });
+
+
+      let tabCollections = document.querySelectorAll('.--tab-collection');
+      let tabTitles = document.querySelectorAll('.--filter-title');
+      tabTitles.forEach((title) => {
+        title.addEventListener('click', () => {
+          // Remove active class from all titles
+          tabTitles.forEach((x) => x.classList.remove('--active-collection'));
+          tabCollections.forEach((x) =>{
+            x.classList.remove('--active-collection')
+            if (x.dataset.title && title.dataset.title && x.dataset.title.trim() === title.dataset.title.trim()) {
+                x.classList.add('--active-collection');
+            }
+          } );
+          // Add active class to the clicked title
+          title.classList.add('--active-collection');
+        });
+      });
+
+  });
+
+  // Optional: Add an event listener to handle window resize events
+</script>
+
+{% schema %}
+{
+  "name": "Featured Collection Tab",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width Section",
+      "default": false
+    },
+      {
+      "type": "text",
+      "id": "id_nav",
+      "label": "Id for Navigtion"
+    },
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Margin Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_m",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_m",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Margin Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_m",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_m",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 32
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection Tab"
+    }
+  ]
+}
+{% endschema %}

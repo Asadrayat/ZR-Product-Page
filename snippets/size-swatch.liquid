@@ -1,0 +1,46 @@
+{%- assign size_option = product.options_with_values | where: 'name', 'Size' | first -%}
+
+{%- if size_option and size_option.values.size > 0 -%}
+  <div class="product-card__size-swatches">
+    {%- assign max_visible_sizes = 4 -%}
+    {%- assign total_sizes = size_option.values.size -%}
+    {%- assign visible_sizes = size_option.values -%}
+
+    {%- if total_sizes > max_visible_sizes -%}
+      {%- assign visible_sizes = size_option.values | slice: 0, max_visible_sizes -%}
+    {%- endif -%}
+
+    {%- for value in visible_sizes -%}
+      {%- assign variant_for_size = product.variants | where: 'option1', value | first -%}
+      {%- unless variant_for_size -%}
+        {%- assign variant_for_size = product.variants | where: 'option2', value | first -%}
+      {%- endunless -%}
+      {%- unless variant_for_size -%}
+        {%- assign variant_for_size = product.variants | where: 'option3', value | first -%}
+      {%- endunless -%}
+
+      {%- assign is_available = variant_for_size.available -%}
+
+      <a
+        href="{% if variant_for_size and is_available %}{{ variant_for_size.url }}{% else %}#{% endif %}"
+        class="product-card__size product-card__size-swatch{% unless is_available %} product-card__size-swatch--disabled{% endunless %}"
+        title="{{ value }}{% unless is_available %} (Unavailable){% endunless %}"
+        {% unless is_available %}
+          aria-disabled="true"
+        {% endunless %}
+      >
+        {{ value }}
+      </a>
+    {%- endfor -%}
+
+    {%- if total_sizes > max_visible_sizes -%}
+      <a
+        href="{{ product.url }}"
+        class="product-card__size product-card__size-swatch product-card__size--more"
+        title="More sizes"
+      >
+        +{{ total_sizes | minus: max_visible_sizes }}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}
